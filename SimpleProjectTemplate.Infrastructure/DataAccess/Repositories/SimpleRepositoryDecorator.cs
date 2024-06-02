@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using SimpleProjectTemplate.Domain.Abstract;
 using SimpleProjectTemplate.Domain.DataAccess.Contracts;
+using SimpleProjectTemplate.Infrastructure.DataAccess.Pagination;
 
 namespace SimpleProjectTemplate.Infrastructure.DataAccess.Repositories;
 
@@ -42,6 +43,13 @@ public class SimpleRepositoryDecorator<TEntity, TId> : IRepository<TEntity, TId>
     public virtual IEnumerable<TEntity> GetList(Expression<Func<TEntity, bool>> filter)
     {
         return BaseRepositoryImpl.GetQueryable().Where(filter).ToList();
+    }
+    
+    public virtual async Task<(IEnumerable<TEntity> Items, int TotalCount)> GetPaginatedListAsync(
+        Expression<Func<TEntity, bool>> filter,
+        PaginationParams paginationParams)
+    {
+        return await BaseRepositoryImpl.GetPaginatedListAsync(filter, paginationParams);
     }
 
     // Expose IQueryable for more complex queries

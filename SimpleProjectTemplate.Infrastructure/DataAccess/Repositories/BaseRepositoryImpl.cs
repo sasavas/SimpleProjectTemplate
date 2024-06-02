@@ -1,5 +1,7 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using SimpleProjectTemplate.Domain.Abstract;
+using SimpleProjectTemplate.Infrastructure.DataAccess.Pagination;
 
 namespace SimpleProjectTemplate.Infrastructure.DataAccess.Repositories;
 
@@ -66,5 +68,19 @@ public class BaseRepositoryImpl<TEntity, TId> where TEntity : AggregateRoot<TId>
         {
             Context.Set<TEntity>().Remove(toDelete);
         }
+    }
+    
+    public virtual async Task<(IEnumerable<TEntity> Items, int TotalCount)> GetPaginatedListAsync(
+        Expression<Func<TEntity, bool>> filter,
+        PaginationParams paginationParams)
+    {
+        var query = GetQueryable().Where(filter);
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+            .Take(paginationParams.PageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
     }
 }

@@ -1,7 +1,9 @@
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using SimpleProjectTemplate.Domain.Abstract;
 using SimpleProjectTemplate.Domain.DataAccess;
 using SimpleProjectTemplate.Domain.DataAccess.Contracts;
+using SimpleProjectTemplate.Infrastructure.DataAccess.Pagination;
 
 namespace SimpleProjectTemplate.Infrastructure.DataAccess.Repositories;
 
@@ -18,7 +20,7 @@ public class MtRepositoryDecorator<TEntity, TId> : IMtRepository<TEntity, TId>
         _userId = userIdProvider.GetUserId();
         BaseRepositoryImpl = new BaseRepositoryImpl<TEntity, TId>(dbContext);
     }
-
+    
     public virtual Task<TEntity> Insert(TEntity entity)
     {
         entity.UserId = _userId;
@@ -37,7 +39,8 @@ public class MtRepositoryDecorator<TEntity, TId> : IMtRepository<TEntity, TId>
 
     public virtual async Task<TEntity?> GetById(TId id)
     {
-        return await BaseRepositoryImpl.GetById(id);
+        var result = await BaseRepositoryImpl.GetById(id);
+        return result?.UserId != _userId ? null : result;
     }
 
     public virtual IEnumerable<TEntity> GetList()
@@ -52,6 +55,21 @@ public class MtRepositoryDecorator<TEntity, TId> : IMtRepository<TEntity, TId>
             .Where(e => e.UserId == _userId)
             .Where(filter)
             .ToList();
+    }
+    
+    public virtual async Task<(IEnumerable<TEntity> Items, int TotalCount)> GetPaginatedListAsync(
+        Expression<Func<TEntity, bool>> filter,
+        PaginationParams paginationParams)
+    {
+        
+        var query = BaseRepositoryImpl.GetQueryable().Where(x => x.UserId == _userId).Where(filter);
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+            .Take(paginationParams.PageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
     }
 
     // Expose IQueryable for more complex queries

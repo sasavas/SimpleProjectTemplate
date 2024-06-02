@@ -1,6 +1,6 @@
 using SimpleProjectTemplate.SharedLibrary.Exceptions;
 
-namespace SimpleProjectTemplate.Domain.Exceptions;
+namespace SimpleProjectTemplate.Domain.Abstract.Exceptions;
 
 public class ValidationException : BaseException
 {

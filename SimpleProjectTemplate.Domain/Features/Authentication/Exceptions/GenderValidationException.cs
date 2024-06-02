@@ -1,4 +1,4 @@
-using SimpleProjectTemplate.Domain.Exceptions;
+using SimpleProjectTemplate.Domain.Abstract.Exceptions;
 using SimpleProjectTemplate.SharedLibrary.Exceptions;
 
 namespace SimpleProjectTemplate.Domain.Features.Authentication.Exceptions;

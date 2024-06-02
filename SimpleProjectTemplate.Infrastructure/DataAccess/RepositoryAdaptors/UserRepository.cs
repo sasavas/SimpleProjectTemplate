@@ -15,20 +15,20 @@ internal class UserRepository : SimpleRepositoryDecorator<User, Guid>, IUserRepo
     
     public User? GetByEmail(string email)
     {
-        return BaseRepositoryImpl.GetList()
+        return Query()
             .Include(user => user.Role) // need this?
             .SingleOrDefault(u => u.Email == new Email(email));
     }
-
+    
     public User? GetByEmailAndPassword(string email, string password)
     {
-        return BaseRepositoryImpl.GetList()
+        return Query()
             .SingleOrDefault(u => u.Email == new Email(email) && u.Password == new Password(password));
     }
 
     public IEnumerable<Permission>? GetUserPermissions(Guid userId)
     {
-        var user = BaseRepositoryImpl.GetList()
+        var user = Query()
             .Include(u => u.Role.Permissions)
             .FirstOrDefault(u => u.Id == userId);
         var permissions = user?.Role?.Permissions;
@@ -37,7 +37,7 @@ internal class UserRepository : SimpleRepositoryDecorator<User, Guid>, IUserRepo
 
     public Role GetUserRole(Guid userId)
     {
-        var user = BaseRepositoryImpl.GetList()
+        var user = Query()
             .Include(u => u.Role)
             .FirstOrDefault(u => u.Id == userId);
         return user!.Role;
@@ -45,13 +45,12 @@ internal class UserRepository : SimpleRepositoryDecorator<User, Guid>, IUserRepo
 
     public User? GetByVerificationCode(string guid)
     {
-        return BaseRepositoryImpl.GetList().FirstOrDefault(user => user.VerificationCode == Guid.Parse(guid));
+        return Query().FirstOrDefault(user => user.VerificationCode == Guid.Parse(guid));
     }
 
     public User? GetUserWithPasswordRequestCode(Guid code)
     {
-        return BaseRepositoryImpl
-            .GetList()
+        return Query()
             .FirstOrDefault(user => user.PasswordResetValues.Any(value => value.Code.Equals(code)));
     }
 }

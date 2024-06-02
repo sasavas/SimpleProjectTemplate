@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using SimpleProjectTemplate.Domain.Abstract;
 
@@ -24,18 +23,10 @@ public class BaseRepositoryImpl<TEntity, TId> where TEntity : AggregateRoot<TId>
         return found;
     }
 
-    public virtual IQueryable<TEntity> GetList(Expression<Func<TEntity, bool>> filter)
-    {
-        var result = Context.Set<TEntity>().Where(filter);
-        return typeof(TEntity).IsAssignableFrom(typeof(ISoftDeletable)) 
-            ? result.Where(s => !((ISoftDeletable)s).IsDeleted) 
-            : result;
-    }
-
-    public virtual IQueryable<TEntity> GetList()
+    public virtual IQueryable<TEntity> GetQueryable()
     {
         var result = Context.Set<TEntity>();
-        return typeof(TEntity).IsAssignableFrom(typeof(ISoftDeletable)) 
+        return typeof(ISoftDeletable).IsAssignableFrom(typeof(TEntity)) 
             ? result.Where(s => !((ISoftDeletable)s).IsDeleted) 
             : result;
     }

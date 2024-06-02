@@ -14,33 +14,39 @@ public class SimpleRepositoryDecorator<TEntity, TId> : IRepository<TEntity, TId>
         BaseRepositoryImpl = new BaseRepositoryImpl<TEntity, TId>(dbContext);
     }
     
-    public async Task<TEntity> Insert(TEntity entity)
+    public virtual async Task<TEntity> Insert(TEntity entity)
     {
         return await BaseRepositoryImpl.Create(entity);
     }
 
-    public TEntity Update(TEntity entity)
+    public virtual TEntity Update(TEntity entity)
     {
         return BaseRepositoryImpl.Update(entity);
     }
 
-    public async Task Delete(TId id)
+    public virtual async Task Delete(TId id)
     {
         await BaseRepositoryImpl.Delete(id);
     }
 
-    public async Task<TEntity?> GetById(TId id)
+    public virtual async Task<TEntity?> GetById(TId id)
     {
         return await BaseRepositoryImpl.GetById(id);
     }
 
-    public IEnumerable<TEntity> GetList()
+    public virtual IEnumerable<TEntity> GetList()
     {
-        return BaseRepositoryImpl.GetList();
+        return BaseRepositoryImpl.GetQueryable().ToList();
     }
 
-    public IEnumerable<TEntity> GetList(Expression<Func<TEntity, bool>> filter)
+    public virtual IEnumerable<TEntity> GetList(Expression<Func<TEntity, bool>> filter)
     {
-        return BaseRepositoryImpl.GetList(filter);
+        return BaseRepositoryImpl.GetQueryable().Where(filter).ToList();
+    }
+
+    // Expose IQueryable for more complex queries
+    protected virtual IQueryable<TEntity> Query()
+    {
+        return BaseRepositoryImpl.GetQueryable();
     }
 }
